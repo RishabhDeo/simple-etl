@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:14
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: stocks
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    working_dir: /scripts
+    
+
+  etl:
+    build: .
+    depends_on:
+      - postgres
+    environment:
+      DB_USER: user
+      DB_PASS: password
+      DB_HOST: postgres  # 👈 This is key: Postgres container hostname
+      DB_PORT: 5432
+      DB_NAME: stocks
+    volumes:
+      - .:/app
+    working_dir: /scripts
+    command: python /scripts/stock_analysis_alpha.py  # Replace with your actual script if different
+
+volumes:
+  pgdata:
